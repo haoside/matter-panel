@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Matter Panel</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="panel">
+        <header class="panel-header">
+            <h1 id="room-name">客厅</h1>
+            <span id="conn-status" class="status disconnected">离线</span>
+        </header>
+
+        <!-- 状态条 -->
+        <div id="status-bar" class="status-bar"></div>
+
+        <main class="panel-grid" id="channel-grid">
+            <!-- 2~4 路实体按键区，由 JS 渲染 -->
+            <!-- 卡片结构：channel-led + channel-num + channel-name + channel-state -->
+        </main>
+
+        <footer class="panel-footer">
+            <button class="foot-btn" data-action="all-on">全开</button>
+            <button class="foot-btn" data-action="all-off">全关</button>
+            <button class="foot-btn" data-action="scene">场景</button>
+        </footer>
+    </div>
+
+    <!-- 异常/配网全屏层 -->
+    <div id="overlay" class="overlay hidden">
+        <div class="overlay-icon" id="overlay-icon">!</div>
+        <h2 id="overlay-title">未配网</h2>
+        <p id="overlay-desc">请先在 Home Assistant 中添加此设备</p>
+        <button id="overlay-action" class="overlay-btn">去配网</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

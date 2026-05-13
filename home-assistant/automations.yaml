@@ -1,0 +1,42 @@
+# Matter Panel 自动化脚本
+
+# 1. 设备上线通知
+- id: matter_device_online
+  alias: "Matter 设备上线"
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.matter_esp32_connected
+      to: "on"
+  action:
+    - service: persistent_notification.create
+      data:
+        title: "Matter 设备"
+        message: "ESP32 设备已上线"
+
+# 2. 面板场景切换
+- id: matter_panel_scene_morning
+  alias: "面板场景: 早安"
+  trigger:
+    - platform: webhook
+      webhook_id: scene_morning
+  action:
+    - service: light.turn_on
+      target:
+        entity_id: light.matter_esp32_light_1
+      data:
+        brightness_pct: 80
+        color_temp_kelvin: 4000
+
+# 3. 设备离线告警
+- id: matter_device_offline_alert
+  alias: "Matter 设备离线告警"
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.matter_esp32_connected
+      to: "off"
+      for: "00:05:00"
+  action:
+    - service: persistent_notification.create
+      data:
+        title: "告警"
+        message: "ESP32 Matter 设备已离线超过 5 分钟"

@@ -1,0 +1,71 @@
+name: Build Matter Panel Firmware
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      board:
+        description: 'Target board'
+        required: true
+        default: 'xiao_esp32c6'
+        type: choice
+        options:
+          - xiao_esp32c6
+          - esp32s3_box3
+      channel_count:
+        description: 'Channel count'
+        required: true
+        default: '4'
+        type: choice
+        options:
+          - '2'
+          - '4'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup ESP-IDF
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.1.2
+          target: ${{ inputs.board == 'esp32s3_box3' && 'esp32s3' || 'esp32c6' }}
+          path: 'esp32-firmware'
+
+      - name: Install esp-matter
+        run: |
+          git clone --recursive https://github.com/espressif/esp-matter.git ~/esp-matter
+          cd ~/esp-matter
+          ./install.sh
+
+      - name: Set channel count
+        run: |
+          sed -i 's/#define CHANNEL_COUNT 4/#define CHANNEL_COUNT ${{ inputs.channel_count }}/' esp32-firmware/main/app_main.cpp
+
+      - name: Build firmware
+        run: |
+          export ESP_MATTER_PATH=$HOME/esp-matter
+          export IDF_PATH=$HOME/esp-idf
+          . $IDF_PATH/export.sh
+          . $ESP_MATTER_PATH/export.sh
+          cd esp32-firmware
+          idf.py set-target ${{ inputs.board == 'esp32s3_box3' && 'esp32s3' || 'esp32c6' }}
+          idf.py build
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p dist/${{ inputs.board }}_${{ inputs.channel_count }}ch
+          cp esp32-firmware/build/bootloader/bootloader.bin dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/
+          cp esp32-firmware/build/partition_table/partition-table.bin dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/
+          cp esp32-firmware/build/matter_panel.bin dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/firmware.bin
+          echo '{"version":"${{ github.ref_name }}","board":"${{ inputs.board }}","channel_count":${{ inputs.channel_count }},"idf_version":"v5.1.2","timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/manifest.json
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: matter-panel_${{ inputs.board }}_${{ inputs.channel_count }}ch
+          path: dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/

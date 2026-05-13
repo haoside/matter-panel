@@ -1,0 +1,296 @@
+:root {
+    --bg: #111317;
+    --card-bg: #1A1D22;
+    --card-bg-press: #22262C;
+    --card-on: #2A2418;
+    --text-primary: #F5F7FA;
+    --text-secondary: #98A2B3;
+    --divider: #2A2F36;
+    --state-online: #3B82F6;
+    --state-on: #F4C542;
+    --state-success: #22C55E;
+    --state-warning: #F59E0B;
+    --state-offline: #667085;
+    --state-error: #EF4444;
+    --radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.panel {
+    width: 100%;
+    max-width: 400px;
+    height: 100%;
+    max-height: 720px;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+    margin-bottom: 8px;
+}
+
+.panel-header h1 { font-size: 16px; font-weight: 600; }
+
+.status {
+    font-size: 12px;
+    font-weight: 400;
+    padding: 2px 10px;
+    border-radius: 10px;
+    background: var(--divider);
+    color: var(--text-primary);
+}
+.status.online { background: var(--state-online); }
+.status.pairing { background: var(--state-warning); color: #000; }
+.status.offline { background: var(--state-offline); }
+.status.error { background: var(--state-error); }
+.status.syncing { background: var(--state-online); }
+
+.status-bar {
+    min-height: 20px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 12px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.status-bar.show { opacity: 1; }
+
+.panel-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    align-content: start;
+    min-height: 0;
+}
+
+.channel-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    cursor: pointer;
+    transition: background 0.1s, border-color 0.2s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    aspect-ratio: 1 / 0.9;
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.channel-card:active {
+    background: var(--card-bg-press);
+}
+
+.channel-card.on {
+    background: var(--card-on);
+    border-color: var(--state-on);
+}
+
+.channel-card.no-response {
+    border-color: var(--state-error);
+    animation: pulse-error 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-error {
+    0%, 100% { border-color: var(--state-error); }
+    50% { border-color: transparent; }
+}
+
+.channel-led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--divider);
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    transition: background 0.2s;
+}
+
+.channel-card.on .channel-led {
+    background: var(--state-on);
+    box-shadow: 0 0 6px var(--state-on);
+}
+
+.channel-card.pending .channel-led {
+    background: var(--state-warning);
+    animation: blink 0.3s ease-in-out 2;
+}
+
+.channel-card.no-response .channel-led {
+    background: var(--state-error);
+    animation: blink-slow 1s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+}
+
+@keyframes blink-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.channel-num {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+}
+
+.channel-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.channel-state {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.channel-card.on .channel-state {
+    color: var(--state-on);
+}
+
+.channel-card.pending .channel-state {
+    color: var(--state-warning);
+}
+
+.channel-card.no-response .channel-state {
+    color: var(--state-error);
+}
+
+/* 2 路布局：上下双卡 */
+.panel-grid.channels-2 {
+    grid-template-columns: 1fr;
+}
+
+.panel-grid.channels-2 .channel-card {
+    aspect-ratio: 1 / 0.42;
+    min-height: 72px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.panel-grid.channels-2 .channel-card .channel-led {
+    position: static;
+    width: 12px;
+    height: 12px;
+}
+
+.panel-grid.channels-2 .channel-card .channel-num {
+    margin-top: 0;
+}
+
+.panel-footer {
+    display: flex;
+    gap: 8px;
+    height: 52px;
+    margin-top: 12px;
+}
+
+.foot-btn {
+    flex: 1;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.foot-btn:active {
+    background: var(--card-bg-press);
+}
+
+/* 异常/配网全屏层 */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 100;
+    padding: 24px;
+    text-align: center;
+}
+
+.overlay.hidden { display: none; }
+
+.overlay-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--divider);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--state-warning);
+}
+
+.overlay h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.overlay p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    max-width: 280px;
+}
+
+.overlay-btn {
+    padding: 12px 32px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--state-online);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.overlay-btn:active {
+    opacity: 0.8;
+}
+
+/* 小屏 */
+@media (max-width: 360px) {
+    .panel { padding: 12px; }
+    .channel-name { font-size: 14px; }
+    .foot-btn { font-size: 13px; }
+}

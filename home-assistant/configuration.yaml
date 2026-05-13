@@ -1,0 +1,81 @@
+# Matter Panel 集成配置 — P0 版（On/Off Light，无调光）
+# Home Assistant 已有实例接入
+
+matter:
+  # HA Core 2024.1+ 内置 Matter 集成
+  # 通过 Python Matter Server 管理设备
+
+# 分组：Matter Panel 设备
+light:
+  - platform: group
+    name: "客厅全部灯光"
+    entities:
+      - light.matter_panel_ch1
+      - light.matter_panel_ch2
+      - light.matter_panel_ch3
+      - light.matter_panel_ch4
+
+# 自动化脚本
+automation:
+  # 全开
+  - id: matter_panel_all_on
+    alias: "Matter Panel: 全开"
+    trigger:
+      - platform: webhook
+        webhook_id: matter_panel_all_on
+    action:
+      - service: light.turn_on
+        target:
+          entity_id:
+            - light.matter_panel_ch1
+            - light.matter_panel_ch2
+            - light.matter_panel_ch3
+            - light.matter_panel_ch4
+
+  # 全关
+  - id: matter_panel_all_off
+    alias: "Matter Panel: 全关"
+    trigger:
+      - platform: webhook
+        webhook_id: matter_panel_all_off
+    action:
+      - service: light.turn_off
+        target:
+          entity_id:
+            - light.matter_panel_ch1
+            - light.matter_panel_ch2
+            - light.matter_panel_ch3
+            - light.matter_panel_ch4
+
+  # 场景：回家
+  - id: matter_panel_scene_home
+    alias: "Matter Panel: 回家"
+    trigger:
+      - platform: webhook
+        webhook_id: matter_panel_scene_home
+    action:
+      - service: light.turn_on
+        target:
+          entity_id:
+            - light.matter_panel_ch1
+            - light.matter_panel_ch2
+      - service: light.turn_off
+        target:
+          entity_id:
+            - light.matter_panel_ch3
+            - light.matter_panel_ch4
+
+  # 场景：离家
+  - id: matter_panel_scene_away
+    alias: "Matter Panel: 离家"
+    trigger:
+      - platform: webhook
+        webhook_id: matter_panel_scene_away
+    action:
+      - service: light.turn_off
+        target:
+          entity_id:
+            - light.matter_panel_ch1
+            - light.matter_panel_ch2
+            - light.matter_panel_ch3
+            - light.matter_panel_ch4
