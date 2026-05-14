@@ -50,7 +50,7 @@ jobs:
           git submodule update --init --depth 1 connectedhomeip
           # Run bootstrap with only esp32 platform to avoid extra deps
           cd connectedhomeip/connectedhomeip
-          source scripts/bootstrap.sh -p esp32
+          bash scripts/bootstrap.sh -p esp32
           cd ../..
           # Run install.sh skipping bootstrap (already done) and host tools
           ./install.sh --no-host-tool --no-bootstrap
