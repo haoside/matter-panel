@@ -26,17 +26,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: espressif/idf:v5.1.2
     env:
-      ESP_MATTER_PATH: ${{ github.workspace }}/../esp-matter
+      ESP_MATTER_PATH: /root/esp-matter
       IDF_PATH: /opt/esp/idf
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup ESP-IDF
-        uses: espressif/esp-idf-ci-action@v1
-        with:
-          esp_idf_version: v5.1.2
-          target: ${{ inputs.board == 'esp32s3_box3' && 'esp32s3' || 'esp32c6' }}
 
       - name: Install esp-matter
         run: |
