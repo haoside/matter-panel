@@ -29,10 +29,10 @@ typedef enum {
 static panel_status_t g_panel_status = PANEL_UNPAIRED;
 
 typedef enum {
-    CH_OFF,
-    CH_ON,
-    CH_PENDING,
-    CH_NO_RESPONSE
+    CHANNEL_OFF,
+    CHANNEL_ON,
+    CHANNEL_PENDING,
+    CHANNEL_NO_RESPONSE
 } channel_power_state_t;
 
 static channel_power_state_t g_channel_states[CHANNEL_COUNT];
@@ -85,16 +85,16 @@ static void status_led_task(void *pv) {
 
 static void update_channel_led(int ch) {
     switch (g_channel_states[ch]) {
-        case CH_OFF:
+        case CHANNEL_OFF:
             ESP_LOGD(TAG, "CH%d LED: off", ch + 1);
             break;
-        case CH_ON:
+        case CHANNEL_ON:
             ESP_LOGD(TAG, "CH%d LED: on (warm)", ch + 1);
             break;
-        case CH_PENDING:
+        case CHANNEL_PENDING:
             ESP_LOGD(TAG, "CH%d LED: pending blink", ch + 1);
             break;
-        case CH_NO_RESPONSE:
+        case CHANNEL_NO_RESPONSE:
             ESP_LOGD(TAG, "CH%d LED: no_response blink", ch + 1);
             break;
     }
@@ -115,7 +115,7 @@ static esp_err_t app_attribute_update_cb(
     for (int i = 0; i < CHANNEL_COUNT; i++) {
         if (endpoint_id == channel_endpoint_ids[i]) {
             bool state = val->val.b;
-            g_channel_states[i] = state ? CH_ON : CH_OFF;
+            g_channel_states[i] = state ? CHANNEL_ON : CHANNEL_OFF;
             gpio_set_level((gpio_num_t)channel_gpios[i], state ? 1 : 0);
             update_channel_led(i);
             ESP_LOGI(TAG, "CH%d (endpoint %d) -> %s", i + 1, endpoint_id, state ? "ON" : "OFF");
@@ -182,7 +182,7 @@ extern "C" void app_main()
     for (int i = 0; i < CHANNEL_COUNT; i++) {
         io_conf.pin_bit_mask |= (1ULL << channel_gpios[i]);
         gpio_set_level((gpio_num_t)channel_gpios[i], 0);
-        g_channel_states[i] = CH_OFF;
+        g_channel_states[i] = CHANNEL_OFF;
     }
     io_conf.pin_bit_mask |= (1ULL << STATUS_LED_GPIO);
     gpio_config(&io_conf);
