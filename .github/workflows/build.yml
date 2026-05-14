@@ -26,6 +26,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ESP_MATTER_PATH: ${{ github.workspace }}/../esp-matter
+      IDF_PATH: /opt/esp/idf
     steps:
       - uses: actions/checkout@v4
 
@@ -34,12 +37,11 @@ jobs:
         with:
           esp_idf_version: v5.1.2
           target: ${{ inputs.board == 'esp32s3_box3' && 'esp32s3' || 'esp32c6' }}
-          path: 'esp32-firmware'
 
       - name: Install esp-matter
         run: |
-          git clone --recursive https://github.com/espressif/esp-matter.git ~/esp-matter
-          cd ~/esp-matter
+          git clone --recursive --depth 1 https://github.com/espressif/esp-matter.git $ESP_MATTER_PATH
+          cd $ESP_MATTER_PATH
           ./install.sh
 
       - name: Set channel count
@@ -48,8 +50,6 @@ jobs:
 
       - name: Build firmware
         run: |
-          export ESP_MATTER_PATH=$HOME/esp-matter
-          export IDF_PATH=$HOME/esp-idf
           . $IDF_PATH/export.sh
           . $ESP_MATTER_PATH/export.sh
           cd esp32-firmware
