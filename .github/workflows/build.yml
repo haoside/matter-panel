@@ -26,7 +26,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: espressif/idf:v5.1.2
+    container: espressif/idf:v5.2.1
     env:
       ESP_MATTER_PATH: /root/esp-matter
       IDF_PATH: /opt/esp/idf
@@ -38,16 +38,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /root/esp-matter
-          key: esp-matter-${{ runner.os }}-v1
+          key: esp-matter-v5.2-${{ runner.os }}-v1
           restore-keys: |
-            esp-matter-${{ runner.os }}-
+            esp-matter-v5.2-${{ runner.os }}-
 
       - name: Install esp-matter
         if: steps.cache-esp-matter.outputs.cache-hit != 'true'
         run: |
           git clone --depth 1 https://github.com/espressif/esp-matter.git $ESP_MATTER_PATH
           cd $ESP_MATTER_PATH
-          # Only init connectedhomeip (core Matter SDK) shallowly
           git submodule update --init --depth 1 connectedhomeip
           ./install.sh
 
@@ -69,7 +68,7 @@ jobs:
           cp esp32-firmware/build/bootloader/bootloader.bin dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/
           cp esp32-firmware/build/partition_table/partition-table.bin dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/
           cp esp32-firmware/build/matter_panel.bin dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/firmware.bin
-          echo '{"version":"${{ github.ref_name }}","board":"${{ inputs.board }}","channel_count":${{ inputs.channel_count }},"idf_version":"v5.1.2","timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/manifest.json
+          echo '{"version":"${{ github.ref_name }}","board":"${{ inputs.board }}","channel_count":${{ inputs.channel_count }},"idf_version":"v5.2.1","timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/manifest.json
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
