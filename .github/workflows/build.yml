@@ -38,7 +38,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /root/esp-matter
-          key: esp-matter-v5.2-${{ runner.os }}-v4
+          key: esp-matter-v5.2-${{ runner.os }}-v5
           restore-keys: |
             esp-matter-v5.2-${{ runner.os }}-
 
@@ -48,11 +48,12 @@ jobs:
           git clone --depth 1 https://github.com/espressif/esp-matter.git $ESP_MATTER_PATH
           cd $ESP_MATTER_PATH
           git submodule update --init --depth 1 connectedhomeip
-          # Patch mobly out of requirements to avoid dependency conflict
-          find $ESP_MATTER_PATH/connectedhomeip/connectedhomeip -name "requirements.txt" -exec sed -i '/mobly/d' {} \;
-          find $ESP_MATTER_PATH/connectedhomeip/connectedhomeip -name "requirements*.txt" -exec sed -i '/mobly/d' {} \;
-          # Run install.sh (skipping host tools build)
-          ./install.sh --no-host-tool || true
+          # Run bootstrap with only esp32 platform to avoid extra deps
+          cd connectedhomeip/connectedhomeip
+          source scripts/bootstrap.sh -p esp32
+          cd ../..
+          # Run install.sh skipping bootstrap (already done) and host tools
+          ./install.sh --no-host-tool --no-bootstrap
 
       - name: Set channel count
         run: |
