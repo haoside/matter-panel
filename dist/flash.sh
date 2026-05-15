@@ -1,42 +1,43 @@
 #!/bin/bash
 set -e
 
-BOARD="${1:-xiao_esp32c6}"
-CH_COUNT="${2:-4}"
-PORT="${3:-/dev/ttyACM0}"
-BAUD="${4:-921600}"
+PORT="${1:-/dev/ttyUSB0}"
+CHIP="esp32c6"
+BAUD="460800"
 
-DIST_DIR="$(cd "$(dirname "$0")" && pwd)/${BOARD}_${CH_COUNT}ch"
-
-if [[ ! -d "$DIST_DIR" ]]; then
-    echo "Error: Build output not found for $BOARD $CH_COUNT channel"
-    echo "Please run build.sh first:"
-    echo "  ./build.sh $BOARD $CH_COUNT"
-    exit 1
-fi
-
-echo "=== Flashing Matter Panel ==="
-echo "Board: $BOARD"
-echo "Channels: $CH_COUNT"
+echo "=== Matter Panel Flash Tool ==="
 echo "Port: $PORT"
-echo "Baud: $BAUD"
+echo "Chip: $CHIP"
 echo ""
 
-esptool.py \
-    --chip auto \
-    --port "$PORT" \
-    --baud "$BAUD" \
-    --before default_reset \
-    --after hard_reset \
-    write_flash \
-    --flash_mode dio \
-    --flash_freq 80m \
-    --flash_size 4MB \
-    0x0000 "$DIST_DIR/bootloader.bin" \
-    0x8000 "$DIST_DIR/partition-table.bin" \
-    0x10000 "$DIST_DIR/firmware.bin"
+# Verify files exist
+for f in bootloader.bin partition-table.bin firmware.bin; do
+    if [ ! -f "$f" ]; then
+        echo "ERROR: $f not found in current directory"
+        echo "Please run this script from the directory containing the .bin files"
+        exit 1
+    fi
+done
+
+echo "Files found:"
+ls -lh bootloader.bin partition-table.bin firmware.bin
+echo ""
+
+# Erase and flash
+echo "Erasing flash..."
+esptool.py --chip $CHIP --port $PORT --baud $BAUD erase_flash
+
+echo ""
+echo "Flashing bootloader -> 0x0..."
+esptool.py --chip $CHIP --port $PORT --baud $BAUD write_flash 0x0 bootloader.bin
+
+echo "Flashing partition-table -> 0x8000..."
+esptool.py --chip $CHIP --port $PORT --baud $BAUD write_flash 0x8000 partition-table.bin
+
+echo "Flashing firmware -> 0x10000..."
+esptool.py --chip $CHIP --port $PORT --baud $BAUD write_flash 0x10000 firmware.bin
 
 echo ""
 echo "=== Flash complete ==="
-echo "Reset the board and check serial output with:"
-echo "  idf.py -p $PORT monitor"
+echo "Reset the board to boot."
+echo "Monitor with: idf.py -p $PORT monitor"
