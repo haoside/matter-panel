@@ -250,19 +250,20 @@ views:
           - entity: "sensor.matter_panel_version"
             name: "固件版本"
 
-      - type: "history-graph"
-        title: "状态历史"
-        entities:
-          - entity: "light.matter_panel_ch1"
-            name: "主灯"
-          - entity: "light.matter_panel_ch2"
-            name: "辅灯"
-          - entity: "light.matter_panel_ch3"
-            name: "灯带"
-          - entity: "light.matter_panel_ch4"
-            name: "壁灯"
-        hours_to_show: 24
-        refresh_interval: 0
+      # P1: 24h 历史（默认隐藏）
+      # - type: "history-graph"
+      #   title: "状态历史"
+      #   entities:
+      #     - entity: "light.matter_panel_ch1"
+      #       name: "主灯"
+      #     - entity: "light.matter_panel_ch2"
+      #       name: "辅灯"
+      #     - entity: "light.matter_panel_ch3"
+      #       name: "灯带"
+      #     - entity: "light.matter_panel_ch4"
+      #       name: "壁灯"
+      #   hours_to_show: 24
+      #   refresh_interval: 0
 
       # 快捷重试
       - type: "button"
@@ -331,13 +332,13 @@ views:
             当前面板状态：`{{ states('sensor.matter_panel_status') }}`
             建议操作：检查设备电源和网络连接。
 
-      # 异常日志
-      - type: "logbook"
-        entities:
-          - sensor.matter_panel_status
-          - light.matter_panel_ch1
-          - light.matter_panel_ch2
-          - light.matter_panel_ch3
-          - light.matter_panel_ch4
-        hours: 24
-        title: "最近 24 小时事件"
+      # P1: 异常日志（默认隐藏）
+      # - type: "logbook"
+      #   entities:
+      #     - sensor.matter_panel_status
+      #     - light.matter_panel_ch1
+      #     - light.matter_panel_ch2
+      #     - light.matter_panel_ch3
+      #     - light.matter_panel_ch4
+      #   hours: 24
+      #   title: "最近 24 小时事件"
