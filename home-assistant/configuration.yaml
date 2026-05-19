@@ -1,9 +1,76 @@
 # Matter Panel 集成配置 — P0 版（On/Off Light，无调光）
 # Home Assistant 已有实例接入
 
+# Lovelace UI 模式：使用自定义 dashboard 文件
+lovelace:
+  mode: storage
+  dashboards:
+    matter-panel:
+      mode: yaml
+      title: "Matter Panel 灯控"
+      icon: mdi:light-switch
+      show_in_sidebar: true
+      filename: ui-lovelace.yaml
+
 matter:
   # HA Core 2024.1+ 内置 Matter 集成
   # 通过 Python Matter Server 管理设备
+
+# 传感器：面板状态追踪
+sensor:
+  # 面板全局状态（由前端/固件上报）
+  - platform: template
+    sensors:
+      matter_panel_status:
+        friendly_name: "面板状态"
+        icon_template: >
+          {% set s = states('sensor.matter_panel_status_raw') | default('unpaired') %}
+          {% if s == 'online' %}mdi:lan-connect
+          {% elif s == 'offline' %}mdi:lan-disconnect
+          {% elif s == 'pairing' %}mdi:bluetooth-connect
+          {% elif s == 'unpaired' %}mdi:bluetooth-off
+          {% elif s == 'syncing' %}mdi:sync
+          {% else %}mdi:alert-circle
+          {% endif %}
+        value_template: >
+          {% set s = states('sensor.matter_panel_status_raw') | default('unpaired') %}
+          {% set mapping = {
+            'unpaired': '未配网',
+            'pairing': '配对中',
+            'online': '在线',
+            'offline': '离线',
+            'syncing': '同步中',
+            'error': '异常'
+          } %}
+          {{ mapping.get(s, '异常') }}
+
+      matter_panel_online_count:
+        friendly_name: "在线设备数"
+        icon_template: "mdi:check-circle"
+        value_template: >
+          {% set chs = ['light.matter_panel_ch1', 'light.matter_panel_ch2',
+                         'light.matter_panel_ch3', 'light.matter_panel_ch4'] %}
+          {{ chs | select('is_state', 'on') | list | length }}
+
+      matter_panel_error_count:
+        friendly_name: "异常设备数"
+        icon_template: "mdi:alert-circle"
+        value_template: >
+          {% set chs = ['light.matter_panel_ch1', 'light.matter_panel_ch2',
+                         'light.matter_panel_ch3', 'light.matter_panel_ch4'] %}
+          {{ chs | select('is_state', 'unavailable') | list | length }}
+
+      matter_panel_last_seen:
+        friendly_name: "最后响应"
+        icon_template: "mdi:clock-outline"
+        value_template: >
+          {{ states.light.matter_panel_ch1.last_changed
+             | default(now()) | as_timestamp | timestamp_local }}
+
+      matter_panel_version:
+        friendly_name: "固件版本"
+        icon_template: "mdi:chip"
+        value_template: "v0.1.0"
 
 # 分组：Matter Panel 设备
 light:

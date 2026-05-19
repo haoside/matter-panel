@@ -1,0 +1,343 @@
+# Matter Panel — HA Lovelace Dashboard v0.1.0
+# P0 MVP: On/Off Light, 4ch main + 2ch cropped
+# Frozen scope: overview + room cards + exception banners
+
+title: "Matter Panel 灯控"
+icon: mdi:light-switch
+
+# Theme override (dark, high contrast)
+theme: "matter-panel-dark"
+
+views:
+  # ──────────────────────────────────────────
+  # View 1: 总览页 (Overview)
+  # ──────────────────────────────────────────
+  - title: "总览"
+    path: "overview"
+    icon: mdi:view-dashboard
+    badges: []
+    cards:
+      # ── 顶部状态区 ──
+      - type: "entities"
+        title: "面板状态"
+        show_header_toggle: false
+        entities:
+          - entity: "sensor.matter_panel_status"
+            name: "面板状态"
+            icon: mdi:lan-connect
+          - entity: "sensor.matter_panel_online_count"
+            name: "在线设备"
+            icon: mdi:check-circle
+          - entity: "sensor.matter_panel_error_count"
+            name: "异常设备"
+            icon: mdi:alert-circle
+
+      # ── 异常 Banner（条件显示） ──
+      - type: "conditional"
+        conditions:
+          - entity: "sensor.matter_panel_status"
+            state: "unpaired"
+        card:
+          type: "markdown"
+          content: |
+            ## ⚠️ 设备未配网
+            请先完成 Matter 配网流程。
+            [去配网](/config/integrations/dashboard)
+
+      - type: "conditional"
+        conditions:
+          - entity: "sensor.matter_panel_status"
+            state: "offline"
+        card:
+          type: "markdown"
+          content: |
+            ## ⚠️ 设备离线
+            请检查电源或网络连接。
+            <ha-icon icon="mdi:refresh"></ha-icon> [刷新状态](#)
+
+      - type: "conditional"
+        conditions:
+          - entity: "sensor.matter_panel_status"
+            state: "error"
+        card:
+          type: "markdown"
+          content: |
+            ## ⚠️ 设备异常
+            当前设备状态异常，请稍后重试。
+            <ha-icon icon="mdi:refresh"></ha-icon> [重试](#)
+
+      # ── 4 路卡片网格 ──
+      - type: "grid"
+        columns: 2
+        square: false
+        cards:
+          - type: "light"
+            entity: "light.matter_panel_ch1"
+            name: "主灯"
+            icon: mdi:ceiling-light
+            show_state: true
+            show_brightness: false
+            tap_action:
+              action: toggle
+            hold_action:
+              action: more-info
+
+          - type: "light"
+            entity: "light.matter_panel_ch2"
+            name: "辅灯"
+            icon: mdi:ceiling-light
+            show_state: true
+            show_brightness: false
+            tap_action:
+              action: toggle
+            hold_action:
+              action: more-info
+
+          - type: "light"
+            entity: "light.matter_panel_ch3"
+            name: "灯带"
+            icon: mdi:led-strip
+            show_state: true
+            show_brightness: false
+            tap_action:
+              action: toggle
+            hold_action:
+              action: more-info
+
+          - type: "light"
+            entity: "light.matter_panel_ch4"
+            name: "壁灯"
+            icon: mdi:wall-sconce
+            show_state: true
+            show_brightness: false
+            tap_action:
+              action: toggle
+            hold_action:
+              action: more-info
+
+      # ── 底部快捷操作 ──
+      - type: "horizontal-stack"
+        cards:
+          - type: "button"
+            name: "全开"
+            icon: mdi:lightbulb-group
+            tap_action:
+              action: call-service
+              service: light.turn_on
+              target:
+                entity_id:
+                  - light.matter_panel_ch1
+                  - light.matter_panel_ch2
+                  - light.matter_panel_ch3
+                  - light.matter_panel_ch4
+            hold_action:
+              action: none
+            show_state: false
+            show_icon: true
+            show_name: true
+
+          - type: "button"
+            name: "全关"
+            icon: mdi:lightbulb-group-off
+            tap_action:
+              action: call-service
+              service: light.turn_off
+              target:
+                entity_id:
+                  - light.matter_panel_ch1
+                  - light.matter_panel_ch2
+                  - light.matter_panel_ch3
+                  - light.matter_panel_ch4
+            hold_action:
+              action: none
+            show_state: false
+            show_icon: true
+            show_name: true
+
+          - type: "button"
+            name: "刷新"
+            icon: mdi:refresh
+            tap_action:
+              action: call-service
+              service: homeassistant.update_entity
+              target:
+                entity_id:
+                  - light.matter_panel_ch1
+                  - light.matter_panel_ch2
+                  - light.matter_panel_ch3
+                  - light.matter_panel_ch4
+            hold_action:
+              action: none
+            show_state: false
+            show_icon: true
+            show_name: true
+
+  # ──────────────────────────────────────────
+  # View 2: 房间页 (Rooms)
+  # ──────────────────────────────────────────
+  - title: "房间"
+    path: "rooms"
+    icon: mdi:home-group
+    cards:
+      - type: "vertical-stack"
+        cards:
+          - type: "markdown"
+            content: "## 客厅"
+
+          - type: "grid"
+            columns: 2
+            square: false
+            cards:
+              - type: "light"
+                entity: "light.matter_panel_ch1"
+                name: "主灯"
+                icon: mdi:ceiling-light
+                show_state: true
+                show_brightness: false
+                tap_action:
+                  action: toggle
+
+              - type: "light"
+                entity: "light.matter_panel_ch2"
+                name: "辅灯"
+                icon: mdi:ceiling-light
+                show_state: true
+                show_brightness: false
+                tap_action:
+                  action: toggle
+
+      - type: "vertical-stack"
+        cards:
+          - type: "markdown"
+            content: "## 卧室"
+
+          - type: "grid"
+            columns: 2
+            square: false
+            cards:
+              - type: "light"
+                entity: "light.matter_panel_ch3"
+                name: "灯带"
+                icon: mdi:led-strip
+                show_state: true
+                show_brightness: false
+                tap_action:
+                  action: toggle
+
+              - type: "light"
+                entity: "light.matter_panel_ch4"
+                name: "壁灯"
+                icon: mdi:wall-sconce
+                show_state: true
+                show_brightness: false
+                tap_action:
+                  action: toggle
+
+  # ──────────────────────────────────────────
+  # View 3: 设备详情 (Device Detail)
+  # ──────────────────────────────────────────
+  - title: "设备详情"
+    path: "detail"
+    icon: mdi:information
+    cards:
+      - type: "entities"
+        title: "面板信息"
+        entities:
+          - entity: "sensor.matter_panel_status"
+            name: "面板状态"
+          - entity: "sensor.matter_panel_last_seen"
+            name: "最后响应"
+          - entity: "sensor.matter_panel_version"
+            name: "固件版本"
+
+      - type: "history-graph"
+        title: "状态历史"
+        entities:
+          - entity: "light.matter_panel_ch1"
+            name: "主灯"
+          - entity: "light.matter_panel_ch2"
+            name: "辅灯"
+          - entity: "light.matter_panel_ch3"
+            name: "灯带"
+          - entity: "light.matter_panel_ch4"
+            name: "壁灯"
+        hours_to_show: 24
+        refresh_interval: 0
+
+      # 快捷重试
+      - type: "button"
+        name: "刷新设备状态"
+        icon: mdi:refresh
+        tap_action:
+          action: call-service
+          service: homeassistant.update_entity
+          target:
+            entity_id:
+              - sensor.matter_panel_status
+              - light.matter_panel_ch1
+              - light.matter_panel_ch2
+              - light.matter_panel_ch3
+              - light.matter_panel_ch4
+
+  # ──────────────────────────────────────────
+  # View 4: 异常页 (Exceptions)
+  # ──────────────────────────────────────────
+  - title: "异常"
+    path: "exceptions"
+    icon: mdi:alert-circle
+    cards:
+      - type: "conditional"
+        conditions:
+          - entity: "sensor.matter_panel_status"
+            state: "unpaired"
+        card:
+          type: "markdown"
+          content: |
+            ## 设备未配网
+            **问题：** 面板尚未完成 Matter 配网。
+            **下一步：** 进入 Home Assistant 的 Matter 集成完成配网。
+            [去配网](/config/integrations/dashboard)
+
+      - type: "conditional"
+        conditions:
+          - entity: "sensor.matter_panel_status"
+            state: "offline"
+        card:
+          type: "markdown"
+          content: |
+            ## 设备离线
+            **问题：** 面板与网络断开连接。
+            **下一步：** 检查电源和网络，然后刷新状态。
+
+      - type: "conditional"
+        conditions:
+          - entity: "sensor.matter_panel_status"
+            state: "error"
+        card:
+          type: "markdown"
+          content: |
+            ## 设备异常
+            **问题：** 面板状态异常。
+            **下一步：** 稍后重试或重启面板。
+
+      - type: "conditional"
+        conditions:
+          - entity: "sensor.matter_panel_status"
+            state_not: ["online", "syncing"]
+        card:
+          type: "markdown"
+          content: |
+            ## 状态异常
+            当前面板状态：`{{ states('sensor.matter_panel_status') }}`
+            建议操作：检查设备电源和网络连接。
+
+      # 异常日志
+      - type: "logbook"
+        entities:
+          - sensor.matter_panel_status
+          - light.matter_panel_ch1
+          - light.matter_panel_ch2
+          - light.matter_panel_ch3
+          - light.matter_panel_ch4
+        hours: 24
+        title: "最近 24 小时事件"
