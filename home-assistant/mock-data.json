@@ -1,0 +1,81 @@
+{
+  "scenarios": {
+    "normal_4ch": {
+      "description": "4路正常态",
+      "panel": {
+        "panel_name": "客厅灯控面板",
+        "panel_status": "online",
+        "ha_status": "connected",
+        "online_count": 4,
+        "error_count": 0,
+        "last_response_at": "2026-05-19T09:30:00+08:00"
+      },
+      "channels": [
+        {"channel_id": "ch1", "entity_id": "light.matter_panel_ch1", "channel_name": "主灯", "power_state": "on",  "availability": "online"},
+        {"channel_id": "ch2", "entity_id": "light.matter_panel_ch2", "channel_name": "辅灯", "power_state": "off", "availability": "online"},
+        {"channel_id": "ch3", "entity_id": "light.matter_panel_ch3", "channel_name": "灯带", "power_state": "on",  "availability": "online"},
+        {"channel_id": "ch4", "entity_id": "light.matter_panel_ch4", "channel_name": "壁灯", "power_state": "off", "availability": "online"}
+      ]
+    },
+    "pending_ch3": {
+      "description": "ch3 执行中",
+      "panel": {"panel_status": "online", "ha_status": "connected"},
+      "channels": [
+        {"channel_id": "ch1", "channel_name": "主灯", "power_state": "on", "availability": "online"},
+        {"channel_id": "ch2", "channel_name": "辅灯", "power_state": "off", "availability": "online"},
+        {"channel_id": "ch3", "channel_name": "灯带", "power_state": "pending", "availability": "online"},
+        {"channel_id": "ch4", "channel_name": "壁灯", "power_state": "off", "availability": "online"}
+      ]
+    },
+    "no_response_ch4": {
+      "description": "ch4 无响应",
+      "panel": {"panel_status": "online", "ha_status": "connected"},
+      "channels": [
+        {"channel_id": "ch1", "channel_name": "主灯", "power_state": "on", "availability": "online"},
+        {"channel_id": "ch2", "channel_name": "辅灯", "power_state": "off", "availability": "online"},
+        {"channel_id": "ch3", "channel_name": "灯带", "power_state": "on", "availability": "online"},
+        {"channel_id": "ch4", "channel_name": "壁灯", "power_state": "no_response", "availability": "online"}
+      ]
+    },
+    "device_offline": {
+      "description": "设备离线",
+      "panel": {"panel_status": "offline", "ha_status": "connected", "online_count": 0, "error_count": 4},
+      "channels": [
+        {"channel_id": "ch1", "channel_name": "主灯", "power_state": "off", "availability": "offline"},
+        {"channel_id": "ch2", "channel_name": "辅灯", "power_state": "off", "availability": "offline"},
+        {"channel_id": "ch3", "channel_name": "灯带", "power_state": "off", "availability": "offline"},
+        {"channel_id": "ch4", "channel_name": "壁灯", "power_state": "off", "availability": "offline"}
+      ]
+    },
+    "ha_disconnected": {
+      "description": "HA 未连接",
+      "panel": {"panel_status": "online", "ha_status": "disconnected", "online_count": 0, "error_count": 1},
+      "channels": [
+        {"channel_id": "ch1", "channel_name": "主灯", "power_state": "unknown", "availability": "unknown"},
+        {"channel_id": "ch2", "channel_name": "辅灯", "power_state": "unknown", "availability": "unknown"},
+        {"channel_id": "ch3", "channel_name": "灯带", "power_state": "unknown", "availability": "unknown"},
+        {"channel_id": "ch4", "channel_name": "壁灯", "power_state": "unknown", "availability": "unknown"}
+      ]
+    },
+    "unpaired": {
+      "description": "未配网",
+      "panel": {"panel_status": "unpaired", "ha_status": "connected", "online_count": 0, "error_count": 0},
+      "channels": []
+    },
+    "cropped_2ch": {
+      "description": "2路裁剪版",
+      "panel": {
+        "panel_name": "主卧灯控面板",
+        "panel_status": "online",
+        "ha_status": "connected",
+        "online_count": 2,
+        "error_count": 0,
+        "last_response_at": "2026-05-19T09:30:00+08:00"
+      },
+      "channels": [
+        {"channel_id": "ch1", "entity_id": "light.matter_panel_ch1", "channel_name": "主灯", "power_state": "on",  "availability": "online"},
+        {"channel_id": "ch2", "entity_id": "light.matter_panel_ch2", "channel_name": "辅灯", "power_state": "off", "availability": "online"}
+      ]
+    }
+  }
+}
