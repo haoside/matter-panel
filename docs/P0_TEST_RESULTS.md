@@ -57,7 +57,7 @@
 | 阶段 | 状态 | 产物 |
 |---|---|---|
 | source_ready | ✅ 已交付 | 源码工程 + 编译脚本 + CI 配置 + 源码包 tar.gz |
-| binary_ready | ⏳ 等待编译 | `firmware.bin / bootloader.bin / partition-table.bin` |
+| binary_ready | ⏳ GitHub Actions 构建中 | https://github.com/haoside/matter-panel/actions/runs/25833519288 |
 | flashed_verified | ⏳ 未开始 | 真机刷写 + P0-01/02/06/07/08 验证 |
 
 ## 阻塞清单

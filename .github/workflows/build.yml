@@ -9,10 +9,10 @@ on:
       board:
         description: 'Target board'
         required: true
-        default: 'xiao_esp32c6'
+        default: 'xiao_esp32h2'
         type: choice
         options:
-          - xiao_esp32c6
+          - xiao_esp32h2
           - esp32s3_box3
       channel_count:
         description: 'Channel count'
@@ -67,7 +67,7 @@ jobs:
           . $IDF_PATH/export.sh
           . $ESP_MATTER_PATH/export.sh
           cd esp32-firmware
-          idf.py set-target ${{ inputs.board == 'esp32s3_box3' && 'esp32s3' || 'esp32c6' }}
+          idf.py set-target ${{ inputs.board == 'esp32s3_box3' && 'esp32s3' || 'esp32h2' }}
           idf.py build
 
       - name: Collect artifacts

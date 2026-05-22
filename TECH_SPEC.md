@@ -1,7 +1,9 @@
-# Matter Panel 技术方案定稿 v1.0
+# Matter Panel 技术方案定稿 v2.0 (Thread)
 
-> **P0 范围**：4 路 On/Off 灯控面板 + HA 接入 + 双向同步 + 异常恢复  
-> **P1 扩展**：调光（Dimmable Light / LevelControl）、更多场景、命名映射优化
+> **P0 范围**：4 路 On/Off 灯控面板 + Matter over Thread + HA 接入 + 双向同步 + 异常恢复
+> **协议**：Matter over Thread (802.15.4)
+> **主控板**：XIAO ESP32-H2
+> **P1 扩展**：调光（Dimmable Light / LevelControl）、更多场景、命名映射优化、Wi-Fi 备用方案
 
 ---
 
@@ -11,12 +13,24 @@
 
 ```
 ┌─────────────────────────────────────────────┐
-│  ESP32-S3 (推荐) / ESP32-C3                  │
-│  ├─ Matter over Wi-Fi Controller            │
+│  XIAO ESP32-H2 (Thread 原生)                 │
+│  ├─ Matter over Thread Controller            │
 │  ├─ 4× GPIO 输出 → 继电器/可控硅              │
 │  ├─ 1× 状态指示灯 (RGB LED / 单色)           │
-│  └─ 可选：小屏 SPI/I2C / 蜂鸣器              │
+│  └─ 可选：小屏 SPI/I2C / 蜂鸣器               │
+│                                               │
+│  前置依赖：Thread Border Router              │
+│  (Apple HomePod / Google Nest / SkyConnect)   │
 └─────────────────────────────────────────────┘
+```
+
+### 1.2 协议栈链路
+
+```
+┌─────────┐   Thread   ┌──────────────┐   IP/Matter  ┌──────────┐
+│ ESP32   │◄──────────►│ Border Router │◄────────────►│ Home     │
+│  H2     │  802.15.4  │ (OTBR)       │              │ Assistant│
+└─────────┘            └──────────────┘              └──────────┘
 ```
 
 ### 1.2 Matter Endpoint 映射（P0：On/Off Light）
