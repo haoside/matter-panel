@@ -9,10 +9,10 @@ on:
       board:
         description: 'Target board'
         required: true
-        default: 'xiao_esp32h2'
+        default: 'xiao_esp32c6'
         type: choice
         options:
-          - xiao_esp32h2
+          - xiao_esp32c6
           - esp32s3_box3
       channel_count:
         description: 'Channel count'
@@ -22,6 +22,14 @@ on:
         options:
           - '2'
           - '4'
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'endpoint'
+        type: choice
+        options:
+          - endpoint
+          - otbr
 
 jobs:
   build:
@@ -38,7 +46,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /root/esp-matter
-          key: esp-matter-v5.2-${{ runner.os }}-v6
+          key: esp-matter-v5.2-${{ runner.os }}-v7
           restore-keys: |
             esp-matter-v5.2-${{ runner.os }}-
 
@@ -50,36 +58,46 @@ jobs:
           cd $ESP_MATTER_PATH
           git submodule update --init --depth 1 connectedhomeip
           cd connectedhomeip/connectedhomeip
-          # Shallow checkout submodules for esp32 platform only
           ./scripts/checkout_submodules.py --shallow --platform esp32
-          # Run bootstrap with only esp32 platform
           bash scripts/bootstrap.sh -p esp32
           cd ../..
-          # Run install.sh skipping bootstrap (already done) and host tools
           ./install.sh --no-host-tool --no-bootstrap
 
       - name: Set channel count
+        if: inputs.build_type == 'endpoint'
         run: |
-          sed -i 's/#define CHANNEL_COUNT 4/#define CHANNEL_COUNT ${{ inputs.channel_count }}/' esp32-firmware/main/app_main.cpp
+          sed -i 's/#define MATTER_PANEL_CHANNEL_COUNT 4/#define MATTER_PANEL_CHANNEL_COUNT ${{ inputs.channel_count }}/' esp32-firmware/main/app_main.cpp
 
-      - name: Build firmware
+      - name: Build endpoint firmware
+        if: inputs.build_type == 'endpoint'
         run: |
           . $IDF_PATH/export.sh
           . $ESP_MATTER_PATH/export.sh
           cd esp32-firmware
-          idf.py set-target ${{ inputs.board == 'esp32s3_box3' && 'esp32s3' || 'esp32h2' }}
+          idf.py set-target esp32c6
+          idf.py build
+
+      - name: Build OTBR firmware
+        if: inputs.build_type == 'otbr'
+        run: |
+          . $IDF_PATH/export.sh
+          . $ESP_MATTER_PATH/export.sh
+          cd esp32-firmware
+          # OTBR uses different sdkconfig
+          cp sdkconfig.otbr sdkconfig.defaults
+          idf.py set-target esp32c6
           idf.py build
 
       - name: Collect artifacts
         run: |
-          mkdir -p dist/${{ inputs.board }}_${{ inputs.channel_count }}ch
-          cp esp32-firmware/build/bootloader/bootloader.bin dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/
-          cp esp32-firmware/build/partition_table/partition-table.bin dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/
-          cp esp32-firmware/build/matter_panel.bin dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/firmware.bin
-          echo '{"version":"${{ github.ref_name }}","board":"${{ inputs.board }}","channel_count":${{ inputs.channel_count }},"idf_version":"v5.2.1","timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/manifest.json
+          mkdir -p dist/${{ inputs.board }}_${{ inputs.channel_count }}ch_${{ inputs.build_type }}
+          cp esp32-firmware/build/bootloader/bootloader.bin dist/${{ inputs.board }}_${{ inputs.channel_count }}ch_${{ inputs.build_type }}/
+          cp esp32-firmware/build/partition_table/partition-table.bin dist/${{ inputs.board }}_${{ inputs.channel_count }}ch_${{ inputs.build_type }}/
+          cp esp32-firmware/build/matter_panel.bin dist/${{ inputs.board }}_${{ inputs.channel_count }}ch_${{ inputs.build_type }}/firmware.bin
+          echo '{"version":"${{ github.ref_name }}","board":"${{ inputs.board }}","channel_count":${{ inputs.channel_count }},"build_type":"${{ inputs.build_type }}","idf_version":"v5.2.1","timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > dist/${{ inputs.board }}_${{ inputs.channel_count }}ch_${{ inputs.build_type }}/manifest.json
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: matter-panel_${{ inputs.board }}_${{ inputs.channel_count }}ch
-          path: dist/${{ inputs.board }}_${{ inputs.channel_count }}ch/
+          name: matter-panel_${{ inputs.board }}_${{ inputs.channel_count }}ch_${{ inputs.build_type }}
+          path: dist/${{ inputs.board }}_${{ inputs.channel_count }}ch_${{ inputs.build_type }}/
